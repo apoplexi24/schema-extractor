@@ -5,7 +5,7 @@ from mysql.connector.cursor import MySQLCursor
 import pandas as pd
 import os
 
-class mysql_schema_extractor:
+class mysql_schema_extractor():
     def __init__(self, host: str, dbname: str, user: str, password: str, port: int = 3306):
         self.mysql_host = host
         self.mysql_dbname = dbname

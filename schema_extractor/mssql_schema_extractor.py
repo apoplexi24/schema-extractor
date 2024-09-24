@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import pyodbc
 
-class MSSQLSchemaExtractor:
+class MSSQLSchemaExtractor():
     def __init__(self, server, database, username, password):
         self.mssql_server = server
         self.mssql_database = database
