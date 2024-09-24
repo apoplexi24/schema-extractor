@@ -100,17 +100,6 @@ schema-extractor/
     extractor.extract_all_schemas()
     ```
 
-#### Data Transfer
-
-1. Transfer data from PostgreSQL to Google BigQuery:
-
-    ```python
-    from data_migrate.data_transfer_new import push_nsecash_sauda_summary
-
-    connection, cursor = connect_to_postgres(host='localhost', dbname='my_database', user='my_user', password='my_password')
-    push_nsecash_sauda_summary(connection)
-    ```
-
 ## Configuration
 
 ### Environment Variables
