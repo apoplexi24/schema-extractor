@@ -11,7 +11,7 @@ Schema Extractor is a tool designed to extract database schemas and transfer dat
 
 ## Project Structure
 
-plaintext
+
 schema-extractor/
 ├── docker/
 │ ├── mssql/
