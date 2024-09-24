@@ -11,7 +11,7 @@ Schema Extractor is a tool designed to extract database schemas and transfer dat
 
 ## Project Structure
 
-
+```plaintext
 schema-extractor/
 ├── docker/
 │ ├── mssql/
@@ -34,6 +34,7 @@ schema-extractor/
 │ └── postgres_schema_extractor.py
 ├── pyproject.toml
 └── README.md
+```
 
 
 ## Getting Started
@@ -105,10 +106,12 @@ schema-extractor/
 ### Environment Variables
 
 Create a `.env` file in the root directory and add the following variables:
+
+```plaintext
 DB_HOST=your_db_host
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
-
+```
 
 ### Docker Configuration
 
