@@ -2,18 +2,19 @@ import os
 import pandas as pd
 import pyodbc
 
-class MSSQLSchemaExtractor():
-    def __init__(self, server, database, username, password):
+class ms_sql_schema_extractor():
+    def __init__(self, server: str, database: str, username: str, password: str, driver_version: int = 17) -> None:
         self.mssql_server = server
         self.mssql_database = database
         self.mssql_username = username
         self.mssql_password = password
+        self.driver_version = driver_version
         self.mssql_connection = None
         self.mssql_cursor = None
 
-    def connect_to_mssql(self):
+    def connect_to_mssql(self) -> None:
         connection_string = (
-            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'DRIVER={ODBC Driver ' + str(self.driver_version) + ' for SQL Server};'
             'SERVER=' + self.mssql_server + ';'
             'DATABASE=' + self.mssql_database + ';'
             'UID=' + self.mssql_username + ';'
@@ -26,7 +27,7 @@ class MSSQLSchemaExtractor():
             print(f"Error connecting to MSSQL: {e}")
             raise e
 
-    def close_connection(self):
+    def close_connection(self) -> None:
         if self.mssql_cursor:
             self.mssql_cursor.close()
         if self.mssql_connection:

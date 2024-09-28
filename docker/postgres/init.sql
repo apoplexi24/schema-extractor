@@ -1,128 +1,71 @@
--- Create tradebook database if not exists
-CREATE DATABASE tradebook;
+-- Create table for app user details similar to GA analytics
 
-\c tradebook;
-
--- Create customer_details table if not exists
-CREATE TABLE IF NOT EXISTS customer_details (
-    customer_id INT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    email VARCHAR(100),
-    phone_number VARCHAR(15),
-    address VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE app_user_details (
+    user_id SERIAL PRIMARY KEY,
+    client_id VARCHAR(255) UNIQUE,
+    first_seen_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_seen_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    device_category VARCHAR(50),
+    operating_system VARCHAR(100),
+    browser VARCHAR(100),
+    country VARCHAR(100),
+    city VARCHAR(100),
+    user_type VARCHAR(50),
+    sessions INTEGER DEFAULT 0,
+    pageviews INTEGER DEFAULT 0,
+    total_time_spent INTERVAL DEFAULT '0 seconds',
+    bounce_rate NUMERIC(5,2),
+    conversion_rate NUMERIC(5,2)
 );
 
--- Create stock_tradebook table if not exists
-CREATE TABLE IF NOT EXISTS stock_tradebook (
-    trade_id INT PRIMARY KEY,
-    customer_id INT,
-    stock_symbol VARCHAR(10),
-    trade_type VARCHAR(4),
-    quantity INT,
-    price DECIMAL(10, 2),
-    trade_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customer_details(customer_id)
+-- Create index for faster queries
+CREATE INDEX idx_app_user_details_client_id ON app_user_details(client_id);
+CREATE INDEX idx_app_user_details_last_seen_date ON app_user_details(last_seen_date);
+
+-- Create table for user sessions
+CREATE TABLE user_sessions (
+    session_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES app_user_details(user_id),
+    session_start TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    session_end TIMESTAMP WITH TIME ZONE,
+    duration INTERVAL,
+    source VARCHAR(100),
+    medium VARCHAR(100),
+    campaign VARCHAR(100),
+    landing_page VARCHAR(255),
+    exit_page VARCHAR(255),
+    pageviews INTEGER DEFAULT 0,
+    events INTEGER DEFAULT 0
 );
 
--- Create customer_app_activity table if not exists
-CREATE TABLE IF NOT EXISTS customer_app_activity (
-    activity_id INT PRIMARY KEY,
-    customer_id INT,
-    activity_type VARCHAR(50),
-    activity_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    device_info VARCHAR(255),
-    FOREIGN KEY (customer_id) REFERENCES customer_details(customer_id)
-);
+-- Create index for faster queries
+CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_user_sessions_session_start ON user_sessions(session_start);
 
--- Insert sample data into customer_details table
-INSERT INTO customer_details (customer_id, first_name, last_name, email, phone_number, address)
-VALUES 
-(1, 'Amit', 'Sharma', 'amit.sharma@example.com', '9876543210', '123 MG Road, Delhi'),
-(2, 'Priya', 'Verma', 'priya.verma@example.com', '8765432109', '456 Brigade Road, Bangalore'),
-(3, 'Raj', 'Patel', 'raj.patel@example.com', '7654321098', '789 Marine Drive, Mumbai'),
-(4, 'Sita', 'Rao', 'sita.rao@example.com', '6543210987', '101 Park Street, Kolkata'),
-(5, 'Vikram', 'Singh', 'vikram.singh@example.com', '5432109876', '202 Anna Salai, Chennai'),
-(6, 'Anjali', 'Nair', 'anjali.nair@example.com', '4321098765', '303 MG Road, Pune'),
-(7, 'Rohit', 'Kumar', 'rohit.kumar@example.com', '3210987654', '404 Brigade Road, Hyderabad'),
-(8, 'Neha', 'Gupta', 'neha.gupta@example.com', '2109876543', '505 Marine Drive, Ahmedabad'),
-(9, 'Arjun', 'Mehta', 'arjun.mehta@example.com', '1098765432', '606 Park Street, Jaipur'),
-(10, 'Kavita', 'Joshi', 'kavita.joshi@example.com', '0987654321', '707 Anna Salai, Lucknow');
+-- Populate app_user_details table with Indian users
+INSERT INTO app_user_details (client_id, device_category, operating_system, browser, country, city, user_type, sessions, pageviews, total_time_spent, bounce_rate, conversion_rate)
+VALUES
+    ('IN001', 'Mobile', 'Android', 'Chrome', 'India', 'Mumbai', 'New', 3, 15, '00:45:30', 20.5, 3.2),
+    ('IN002', 'Desktop', 'Windows', 'Firefox', 'India', 'Delhi', 'Returning', 7, 42, '02:15:00', 15.3, 5.7),
+    ('IN003', 'Tablet', 'iOS', 'Safari', 'India', 'Bangalore', 'New', 2, 8, '00:20:15', 35.0, 1.8),
+    ('IN004', 'Mobile', 'Android', 'Samsung Internet', 'India', 'Chennai', 'Returning', 5, 27, '01:30:45', 18.7, 4.5),
+    ('IN005', 'Desktop', 'macOS', 'Chrome', 'India', 'Kolkata', 'New', 1, 4, '00:10:30', 50.0, 0.0),
+    ('IN006', 'Mobile', 'iOS', 'Chrome', 'India', 'Hyderabad', 'Returning', 9, 63, '03:45:00', 12.1, 7.8),
+    ('IN007', 'Desktop', 'Linux', 'Firefox', 'India', 'Pune', 'New', 2, 11, '00:35:20', 27.3, 2.5),
+    ('IN008', 'Mobile', 'Android', 'Opera', 'India', 'Ahmedabad', 'Returning', 6, 38, '02:00:15', 16.5, 6.2),
+    ('IN009', 'Tablet', 'Android', 'Chrome', 'India', 'Jaipur', 'New', 1, 5, '00:15:45', 40.0, 1.0),
+    ('IN010', 'Desktop', 'Windows', 'Edge', 'India', 'Lucknow', 'Returning', 4, 22, '01:10:30', 22.7, 3.9);
 
--- Insert sample data into stock_tradebook table
-INSERT INTO stock_tradebook (trade_id, customer_id, stock_symbol, trade_type, quantity, price)
-VALUES 
-(1, 1, 'TCS', 'BUY', 10, 3500.00),
-(2, 2, 'INFY', 'SELL', 5, 1500.00),
-(3, 3, 'RELI', 'BUY', 20, 2500.00),
-(4, 4, 'WIPRO', 'BUY', 15, 550.00),
-(5, 5, 'HDFC', 'SELL', 8, 2700.00),
-(6, 6, 'ICICI', 'BUY', 12, 600.00),
-(7, 7, 'SBIN', 'SELL', 25, 450.00),
-(8, 8, 'BHARTIARTL', 'BUY', 18, 700.00),
-(9, 9, 'ADANIPORTS', 'SELL', 30, 800.00),
-(10, 10, 'ITC', 'BUY', 22, 220.00);
-
--- Insert sample data into customer_app_activity table
-INSERT INTO customer_app_activity (activity_id, customer_id, activity_type, activity_timestamp, device_info)
-VALUES 
-(1, 1, 'Login', NOW(), 'OnePlus 9'),
-(2, 2, 'Trade', NOW(), 'Samsung Galaxy S21'),
-(3, 3, 'Logout', NOW(), 'Xiaomi Mi 11'),
-(4, 4, 'Login', NOW(), 'Apple iPhone 12'),
-(5, 5, 'Trade', NOW(), 'Google Pixel 5'),
-(6, 6, 'Logout', NOW(), 'OnePlus 8T'),
-(7, 7, 'Login', NOW(), 'Samsung Galaxy Note 20'),
-(8, 8, 'Trade', NOW(), 'Apple iPhone 11'),
-(9, 9, 'Logout', NOW(), 'Xiaomi Mi 10'),
-(10, 10, 'Login', NOW(), 'Google Pixel 4a');
-
--- Create company database if not exists
-CREATE DATABASE company;
-
-\c company;
-
--- Create company_revenue table if not exists
-CREATE TABLE IF NOT EXISTS company_revenue (
-    revenue_id INT PRIMARY KEY,
-    company_name VARCHAR(255),
-    revenue_amount DECIMAL(18, 2),
-    revenue_date DATE
-);
-
--- Insert sample data into company_revenue table
-INSERT INTO company_revenue (revenue_id, company_name, revenue_amount, revenue_date)
-VALUES 
-(1, 'TCS', 5000000.00, '2023-01-01'),
-(2, 'Infosys', 4500000.00, '2023-01-01'),
-(3, 'Reliance', 7000000.00, '2023-01-01'),
-(4, 'Wipro', 3000000.00, '2023-01-01'),
-(5, 'HDFC', 6000000.00, '2023-01-01'),
-(6, 'ICICI', 4000000.00, '2023-01-01'),
-(7, 'SBI', 5500000.00, '2023-01-01'),
-(8, 'Bharti Airtel', 3500000.00, '2023-01-01'),
-(9, 'Adani Ports', 6500000.00, '2023-01-01'),
-(10, 'ITC', 2500000.00, '2023-01-01');
-
--- Create company_board_directors table if not exists
-CREATE TABLE IF NOT EXISTS company_board_directors (
-    director_id INT PRIMARY KEY,
-    company_name VARCHAR(255),
-    director_name VARCHAR(255),
-    appointment_date DATE
-);
-
--- Insert sample data into company_board_directors table
-INSERT INTO company_board_directors (director_id, company_name, director_name, appointment_date)
-VALUES 
-(1, 'TCS', 'Natarajan Chandrasekaran', '2017-02-21'),
-(2, 'Infosys', 'Salil Parekh', '2018-01-02'),
-(3, 'Reliance', 'Mukesh Ambani', '2002-07-24'),
-(4, 'Wipro', 'Thierry Delaporte', '2020-07-06'),
-(5, 'HDFC', 'Sashidhar Jagdishan', '2020-10-27'),
-(6, 'ICICI', 'Sandeep Bakhshi', '2018-10-15'),
-(7, 'SBI', 'Dinesh Kumar Khara', '2020-10-07'),
-(8, 'Bharti Airtel', 'Sunil Bharti Mittal', '1995-07-07'),
-(9, 'Adani Ports', 'Karan Adani', '2016-01-01'),
-(10, 'ITC', 'Sanjiv Puri', '2017-05-16');
+-- Populate user_sessions table with corresponding session data
+INSERT INTO user_sessions (user_id, session_start, session_end, duration, source, medium, campaign, landing_page, exit_page, pageviews, events)
+VALUES
+    (1, '2023-05-01 10:00:00+05:30', '2023-05-01 10:15:30+05:30', '00:15:30', 'Google', 'Organic', 'None', '/home', '/products', 5, 3),
+    (2, '2023-05-02 14:30:00+05:30', '2023-05-02 15:00:00+05:30', '00:30:00', 'Facebook', 'Social', 'Summer_Sale', '/sale', '/checkout', 8, 6),
+    (3, '2023-05-03 09:45:00+05:30', '2023-05-03 09:55:15+05:30', '00:10:15', 'Direct', 'None', 'None', '/about', '/contact', 4, 2),
+    (4, '2023-05-04 18:20:00+05:30', '2023-05-04 18:50:45+05:30', '00:30:45', 'Instagram', 'Social', 'Influencer_1', '/special-offer', '/cart', 7, 5),
+    (5, '2023-05-05 11:30:00+05:30', '2023-05-05 11:40:30+05:30', '00:10:30', 'Bing', 'Organic', 'None', '/services', '/services', 4, 1),
+    (6, '2023-05-06 16:00:00+05:30', '2023-05-06 16:45:00+05:30', '00:45:00', 'Email', 'Email', 'Newsletter_May', '/blog', '/subscribe', 9, 7),
+    (7, '2023-05-07 13:15:00+05:30', '2023-05-07 13:32:50+05:30', '00:17:50', 'Twitter', 'Social', 'Product_Launch', '/new-arrival', '/product-details', 6, 4),
+    (8, '2023-05-08 20:45:00+05:30', '2023-05-08 21:15:15+05:30', '00:30:15', 'AdWords', 'PPC', 'Summer_Collection', '/summer', '/size-guide', 8, 5),
+    (9, '2023-05-09 10:30:00+05:30', '2023-05-09 10:45:45+05:30', '00:15:45', 'YouTube', 'Social', 'Tutorial_1', '/how-to', '/faq', 5, 2),
+    (10, '2023-05-10 17:00:00+05:30', '2023-05-10 17:25:30+05:30', '00:25:30', 'Referral', 'Partner', 'Affiliate_1', '/special-discount', '/thank-you', 7, 4);

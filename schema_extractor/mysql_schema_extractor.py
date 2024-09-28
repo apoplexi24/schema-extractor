@@ -6,7 +6,7 @@ import pandas as pd
 import os
 
 class mysql_schema_extractor():
-    def __init__(self, host: str, dbname: str, user: str, password: str, port: int = 3306):
+    def __init__(self, host: str, dbname: str, user: str, password: str, port: int = 3306) -> None:
         self.mysql_host = host
         self.mysql_dbname = dbname
         self.mysql_user = user

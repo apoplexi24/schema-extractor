@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 from psycopg2.extensions import connection, cursor
 
 class postgres_schema_extractor():
-    def __init__(self, host: str, dbname: str, user: str, password: str, port: int = 5432):
+    def __init__(self, host: str, dbname: str, user: str, password: str, port: int = 5432) -> None:
         self.postgres_host = host
         self.postgres_dbname = dbname
         self.postgres_user = user

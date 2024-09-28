@@ -1,128 +1,65 @@
--- Create tradebook database if not exists
-CREATE DATABASE IF NOT EXISTS tradebook;
+-- Create table for stock prices every 15 minutes
+CREATE TABLE stock_prices_15min (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL,
+    timestamp DATETIME NOT NULL,
+    open_price DECIMAL(10, 2) NOT NULL,
+    high_price DECIMAL(10, 2) NOT NULL,
+    low_price DECIMAL(10, 2) NOT NULL,
+    close_price DECIMAL(10, 2) NOT NULL,
+    volume INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_symbol_timestamp (symbol, timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-USE tradebook;
+-- Create table for stock metadata
+CREATE TABLE stocks (
+    symbol VARCHAR(10) PRIMARY KEY,
+    company_name VARCHAR(255) NOT NULL,
+    sector VARCHAR(100),
+    industry VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create customer_details table if not exists
-CREATE TABLE IF NOT EXISTS customer_details (
-    customer_id INT PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    email VARCHAR(100),
-    phone_number VARCHAR(15),
-    address VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+-- Add foreign key constraint
+ALTER TABLE stock_prices_15min
+ADD CONSTRAINT fk_stock_prices_15min_symbol
+FOREIGN KEY (symbol) REFERENCES stocks(symbol);
 
--- Create stock_tradebook table if not exists
-CREATE TABLE IF NOT EXISTS stock_tradebook (
-    trade_id INT PRIMARY KEY,
-    customer_id INT,
-    stock_symbol VARCHAR(10),
-    trade_type VARCHAR(4),
-    quantity INT,
-    price DECIMAL(10, 2),
-    trade_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customer_details(customer_id)
-);
+-- Populate stocks table with Indian stocks
+INSERT INTO stocks (symbol, company_name, sector, industry) VALUES
+('RELIANCE', 'Reliance Industries Limited', 'Energy', 'Oil & Gas'),
+('TCS', 'Tata Consultancy Services Limited', 'Technology', 'IT Services'),
+('HDFCBANK', 'HDFC Bank Limited', 'Financial Services', 'Banking'),
+('INFY', 'Infosys Limited', 'Technology', 'IT Services'),
+('HINDUNILVR', 'Hindustan Unilever Limited', 'Consumer Goods', 'FMCG'),
+('ICICIBANK', 'ICICI Bank Limited', 'Financial Services', 'Banking'),
+('SBIN', 'State Bank of India', 'Financial Services', 'Banking'),
+('BHARTIARTL', 'Bharti Airtel Limited', 'Communication', 'Telecom'),
+('ITC', 'ITC Limited', 'Consumer Goods', 'FMCG'),
+('KOTAKBANK', 'Kotak Mahindra Bank Limited', 'Financial Services', 'Banking'),
+('WIPRO', 'Wipro Limited', 'Technology', 'IT Services'),
+('ASIANPAINT', 'Asian Paints Limited', 'Consumer Goods', 'Paints'),
+('MARUTI', 'Maruti Suzuki India Limited', 'Automobile', 'Passenger Vehicles'),
+('LT', 'Larsen & Toubro Limited', 'Construction', 'Engineering'),
+('AXISBANK', 'Axis Bank Limited', 'Financial Services', 'Banking');
 
--- Create customer_app_activity table if not exists
-CREATE TABLE IF NOT EXISTS customer_app_activity (
-    activity_id INT PRIMARY KEY,
-    customer_id INT,
-    activity_type VARCHAR(50),
-    activity_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    device_info VARCHAR(255),
-    FOREIGN KEY (customer_id) REFERENCES customer_details(customer_id)
-);
-
--- Insert sample data into customer_details table
-INSERT INTO customer_details (customer_id, first_name, last_name, email, phone_number, address)
-VALUES 
-(1, 'Amit', 'Sharma', 'amit.sharma@example.com', '9876543210', '123 MG Road, Delhi'),
-(2, 'Priya', 'Verma', 'priya.verma@example.com', '8765432109', '456 Brigade Road, Bangalore'),
-(3, 'Raj', 'Patel', 'raj.patel@example.com', '7654321098', '789 Marine Drive, Mumbai'),
-(4, 'Sita', 'Rao', 'sita.rao@example.com', '6543210987', '101 Park Street, Kolkata'),
-(5, 'Vikram', 'Singh', 'vikram.singh@example.com', '5432109876', '202 Anna Salai, Chennai'),
-(6, 'Anjali', 'Nair', 'anjali.nair@example.com', '4321098765', '303 MG Road, Pune'),
-(7, 'Rohit', 'Kumar', 'rohit.kumar@example.com', '3210987654', '404 Brigade Road, Hyderabad'),
-(8, 'Neha', 'Gupta', 'neha.gupta@example.com', '2109876543', '505 Marine Drive, Ahmedabad'),
-(9, 'Arjun', 'Mehta', 'arjun.mehta@example.com', '1098765432', '606 Park Street, Jaipur'),
-(10, 'Kavita', 'Joshi', 'kavita.joshi@example.com', '0987654321', '707 Anna Salai, Lucknow');
-
--- Insert sample data into stock_tradebook table
-INSERT INTO stock_tradebook (trade_id, customer_id, stock_symbol, trade_type, quantity, price)
-VALUES 
-(1, 1, 'TCS', 'BUY', 10, 3500.00),
-(2, 2, 'INFY', 'SELL', 5, 1500.00),
-(3, 3, 'RELI', 'BUY', 20, 2500.00),
-(4, 4, 'WIPRO', 'BUY', 15, 550.00),
-(5, 5, 'HDFC', 'SELL', 8, 2700.00),
-(6, 6, 'ICICI', 'BUY', 12, 600.00),
-(7, 7, 'SBIN', 'SELL', 25, 450.00),
-(8, 8, 'BHARTIARTL', 'BUY', 18, 700.00),
-(9, 9, 'ADANIPORTS', 'SELL', 30, 800.00),
-(10, 10, 'ITC', 'BUY', 22, 220.00);
-
--- Insert sample data into customer_app_activity table
-INSERT INTO customer_app_activity (activity_id, customer_id, activity_type, activity_timestamp, device_info)
-VALUES 
-(1, 1, 'Login', NOW(), 'OnePlus 9'),
-(2, 2, 'Trade', NOW(), 'Samsung Galaxy S21'),
-(3, 3, 'Logout', NOW(), 'Xiaomi Mi 11'),
-(4, 4, 'Login', NOW(), 'Apple iPhone 12'),
-(5, 5, 'Trade', NOW(), 'Google Pixel 5'),
-(6, 6, 'Logout', NOW(), 'OnePlus 8T'),
-(7, 7, 'Login', NOW(), 'Samsung Galaxy Note 20'),
-(8, 8, 'Trade', NOW(), 'Apple iPhone 11'),
-(9, 9, 'Logout', NOW(), 'Xiaomi Mi 10'),
-(10, 10, 'Login', NOW(), 'Google Pixel 4a');
-
--- Create company database if not exists
-CREATE DATABASE IF NOT EXISTS company;
-
-USE company;
-
--- Create company_revenue table if not exists
-CREATE TABLE IF NOT EXISTS company_revenue (
-    revenue_id INT PRIMARY KEY,
-    company_name VARCHAR(255),
-    revenue_amount DECIMAL(18, 2),
-    revenue_date DATE
-);
-
--- Insert sample data into company_revenue table
-INSERT INTO company_revenue (revenue_id, company_name, revenue_amount, revenue_date)
-VALUES 
-(1, 'TCS', 5000000.00, '2023-01-01'),
-(2, 'Infosys', 4500000.00, '2023-01-01'),
-(3, 'Reliance', 7000000.00, '2023-01-01'),
-(4, 'Wipro', 3000000.00, '2023-01-01'),
-(5, 'HDFC', 6000000.00, '2023-01-01'),
-(6, 'ICICI', 4000000.00, '2023-01-01'),
-(7, 'SBI', 5500000.00, '2023-01-01'),
-(8, 'Bharti Airtel', 3500000.00, '2023-01-01'),
-(9, 'Adani Ports', 6500000.00, '2023-01-01'),
-(10, 'ITC', 2500000.00, '2023-01-01');
-
--- Create company_board_directors table if not exists
-CREATE TABLE IF NOT EXISTS company_board_directors (
-    director_id INT PRIMARY KEY,
-    company_name VARCHAR(255),
-    director_name VARCHAR(255),
-    appointment_date DATE
-);
-
--- Insert sample data into company_board_directors table
-INSERT INTO company_board_directors (director_id, company_name, director_name, appointment_date)
-VALUES 
-(1, 'TCS', 'Natarajan Chandrasekaran', '2017-02-21'),
-(2, 'Infosys', 'Salil Parekh', '2018-01-02'),
-(3, 'Reliance', 'Mukesh Ambani', '2002-07-24'),
-(4, 'Wipro', 'Thierry Delaporte', '2020-07-06'),
-(5, 'HDFC', 'Sashidhar Jagdishan', '2020-10-27'),
-(6, 'ICICI', 'Sandeep Bakhshi', '2018-10-15'),
-(7, 'SBI', 'Dinesh Kumar Khara', '2020-10-07'),
-(8, 'Bharti Airtel', 'Sunil Bharti Mittal', '1995-07-07'),
-(9, 'Adani Ports', 'Karan Adani', '2016-01-01'),
-(10, 'ITC', 'Sanjiv Puri', '2017-05-16');
+-- Populate stock_prices_15min table with sample data
+INSERT INTO stock_prices_15min (symbol, timestamp, open_price, high_price, low_price, close_price, volume) VALUES
+('RELIANCE', '2023-05-01 09:15:00', 2100.00, 2110.50, 2095.00, 2105.25, 1000000),
+('TCS', '2023-05-01 09:15:00', 3200.00, 3215.75, 3190.50, 3210.00, 500000),
+('HDFCBANK', '2023-05-01 09:15:00', 1650.00, 1660.25, 1645.50, 1655.75, 750000),
+('INFY', '2023-05-01 09:15:00', 1300.00, 1310.50, 1295.00, 1305.25, 600000),
+('HINDUNILVR', '2023-05-01 09:15:00', 2600.00, 2615.75, 2590.50, 2610.00, 300000),
+('ICICIBANK', '2023-05-01 09:15:00', 900.00, 910.25, 895.50, 905.75, 800000),
+('SBIN', '2023-05-01 09:15:00', 550.00, 555.50, 547.00, 552.25, 1200000),
+('BHARTIARTL', '2023-05-01 09:15:00', 750.00, 755.75, 745.50, 752.00, 700000),
+('ITC', '2023-05-01 09:15:00', 400.00, 405.25, 398.50, 402.75, 1500000),
+('KOTAKBANK', '2023-05-01 09:15:00', 1800.00, 1810.50, 1795.00, 1805.25, 400000),
+('WIPRO', '2023-05-01 09:15:00', 400.00, 405.75, 398.50, 403.00, 550000),
+('ASIANPAINT', '2023-05-01 09:15:00', 3000.00, 3015.25, 2990.50, 3010.75, 200000),
+('MARUTI', '2023-05-01 09:15:00', 8500.00, 8550.50, 8480.00, 8525.25, 100000),
+('LT', '2023-05-01 09:15:00', 2200.00, 2215.75, 2190.50, 2210.00, 350000),
+('AXISBANK', '2023-05-01 09:15:00', 950.00, 960.25, 945.50, 955.75, 650000);
