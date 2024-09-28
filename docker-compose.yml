@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    build: ./docker/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    ports:
+      - "3306:3306"
+    networks:
+      - testing
+
+  postgres:
+    build: ./docker/postgres
+    environment:
+      POSTGRES_DB: my_database
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    ports:
+      - "5432:5432"
+    networks:
+      - testing
+
+  mssql:
+    build: ./docker/mssql
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      MSSQL_DATABASE: "my_database"
+    ports:
+      - "1433:1433"
+    networks:
+      - testing
+
+  app:
+    image: python:3.11
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: poetry run pytest
+    networks:
+      - testing
+
+networks:
+  testing:
+    driver: bridge
