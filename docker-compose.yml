@@ -37,17 +37,11 @@ services:
       - testing
 
   app:
-    build: 
-      dockerfile: ./docker/app/Dockerfile
-      context: .       
+    image: python:3.11
     volumes:
-      - .:/app               # Mount the local project directory to /app in the container
+      - .:/app
     working_dir: /app
-    command: poetry run pytest  # Running tests with Poetry
-    depends_on:
-      - mysql
-      - postgres
-      - mssql
+    command: poetry run pytest
     networks:
       - testing
 
